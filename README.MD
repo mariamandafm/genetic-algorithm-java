@@ -19,6 +19,10 @@ Pedro Costa,(95) 91099-5899,São Paulo,93681-945,Jardins,Rua das Flores,556,-23,
 A classe `OrderDataGenerator` cria esses dados mocados para serem utilizados na aplicação.
 
 ## Versões
-| Versão | Tempo de processamento | Descrição                 |
-|--------|------------------------|---------------------------|
-| v1     |                        | Implementação sequêncial. |
+
+ℹ️ O algoritmo está sendo rodado com os parametros population: 10, generations: 10.
+
+| Versão | Java                                          | Rust                                              | Descrição                 |
+|--------|-----------------------------------------------|---------------------------------------------------|---------------------------|
+| v1     | Leitura dos dados 7.134s + Processamento 540s | Leitura dos dados 12.80s + Processamento 1373.87s | Implementação sequêncial. |
+| v2     | Processamento 126.583s                        |                                                   | Platform threads          |

@@ -1,0 +1,230 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.*;
+
+class GeneticAlgorithmPathFindingV2 {
+    static Random random = new Random();
+
+    /*
+    * Calcula a distância entre dois pontos.
+    * */
+    static double distance(double[] p1, double[] p2) {
+        return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
+    }
+
+    /*
+    * Distância total calculada como a soma das distância entre os pontos.
+    * Função utilizada como fitness para decidir qual a melhor rota.
+    * */
+    static double totalDistance(List<double[]> route) {
+        double sum = 0;
+        for (int i = 0; i < route.size() - 1; i++) {
+            sum += distance(route.get(i), route.get(i + 1));
+        }
+        return sum;
+    }
+
+    /*
+    * Cria população inicial gerando arrays cujos elementos são "genes" ordenados de forma aleatória.
+    * */
+    static List<List<double[]>> createPopulation(List<double[]> locations, double[] start, int size) {
+        List<List<double[]>> population = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            System.out.println("Pop" + i);
+            List<double[]> route = new ArrayList<>(locations);
+            Collections.shuffle(route);
+            route.add(0, start);
+            route.add(start);
+            population.add(route);
+        }
+        return population;
+    }
+
+    /*
+    * Seleciona um número k de membros da população e escolhe o que possui e menor distância.
+    * */
+    static List<double[]> tournamentSelection(List<List<double[]>> population, int k) {
+        List<List<double[]>> selected = new ArrayList<>();
+        for (int i = 0; i < k; i++) {
+            selected.add(population.get(random.nextInt(population.size())));
+        }
+        return selected.stream()
+                .min(Comparator.comparingDouble(GeneticAlgorithmPathFindingV2::totalDistance))
+                .orElse(null);
+
+    }
+
+    /*
+    * Faz a troca de material genético com dois elementos, gerando um filho.
+    * Esse é o método que mais exige processamento, pois ao copiar os genes do pai 2, é preciso checar se
+    * o filho já não o herdou do pai 1.
+    * */
+    static List<double[]> crossover(List<double[]> parent1, List<double[]> parent2) {
+        final int size = parent1.size();
+        final Random random = new Random();
+        // Seleciona região aleatória para pegar os genes do pai 1.
+        int start = random.nextInt(size);
+        int end = random.nextInt(size - start) + start;
+
+        List<double[]> child = new ArrayList<>(size);
+
+        Set<Integer> genesInChild = new HashSet<>(size);
+
+        for (int i = start; i <= end; i++) {
+            double[] gene = parent1.get(i);
+            child.add(gene);
+            genesInChild.add(Arrays.hashCode(gene));
+        }
+        // Preenche o restante com os genes do pai 2.
+        int currentPos = 0;
+        for (double[] gene : parent2) {
+            if (currentPos == start) {
+                currentPos = end + 1;  // Pula a região já copiada
+                if (currentPos >= size) break;
+            }
+
+            int geneHash = Arrays.hashCode(gene);
+            if (!genesInChild.contains(geneHash)) {
+                child.add(currentPos, gene);
+                genesInChild.add(geneHash);
+                currentPos++;
+            }
+        }
+        return child;
+    }
+
+    /*
+    * Faz uma mutação no elemento.
+    * mutationRate representa a probabilidade de ocorrer uma mutação.
+    * */
+    static List<double[]> mutate(List<double[]> route, double mutationRate) {
+        //System.out.println(Thread.currentThread().getName());
+        // Seleciona um número aleatório que deve estar abaixo da taxa de mutação
+        if (random.nextDouble() < mutationRate) {
+            // Troca dois genes
+            int i = random.nextInt(route.size() - 2) + 1;
+            int j = random.nextInt(route.size() - 2) + 1;
+            Collections.swap(route, i, j);
+        }
+        if (random.nextDouble() < mutationRate / 2) {
+            // Inverte um intervalo do gene
+            int i = random.nextInt(route.size() - 2) + 1;
+            int j = random.nextInt(route.size() - 2) + 1;
+            if (i > j) {
+                int temp = i;
+                i = j;
+                j = temp;
+            }
+            Collections.reverse(route.subList(i, j));
+        }
+        return route;
+    }
+
+    static List<double[]> geneticAlgorithm(List<double[]> locations, double[] start,
+                                           int generations, int populationSize) throws ExecutionException, InterruptedException {
+        System.out.println("Criando população");
+        List<List<double[]>> population = createPopulation(locations, start, populationSize);
+        System.out.println("População criada");
+
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        // Para cada geração
+        for (int gen = 0; gen < generations; gen++) {
+
+
+            System.out.println("Gen " + gen);
+            // Inicia uma nova população
+            List<List<double[]>> newPopulation = new ArrayList<>();
+
+            // Seleciona alguns individuos por torneio
+            List<Future<List<double[]>>> tournamentFutures = new ArrayList<>();
+            for (int i = 0; i < populationSize / 2; i++) {
+                List<List<double[]>> finalPopulation1 = population;
+                tournamentFutures.add(executor.submit(()->tournamentSelection(finalPopulation1, 2)));
+                //newPopulation.add(tournamentSelection(population, 2));
+            }
+
+            for (Future<List<double[]>> future : tournamentFutures) {
+                newPopulation.add(future.get()); // Espera cada tarefa finalizar
+            }
+
+            // Faz cruzamento entre elementos e mutação.
+            List<Future<List<double[]>>> childFutures = new ArrayList<>();
+            List<List<double[]>> children = new ArrayList<>();
+            for (int i = 0; i < populationSize - newPopulation.size(); i++) {
+                List<List<double[]>> finalPopulation = population;
+                Future<List<double[]>> future = executor.submit(() -> {
+                    List<double[]> parent1 = tournamentSelection(finalPopulation, 2);
+                    List<double[]> parent2 = tournamentSelection(finalPopulation, 2);
+                    List<double[]> child = crossover(parent1, parent2);
+                    return mutate(child, 0.2);
+                });
+                childFutures.add(future);
+            }
+
+            for (Future<List<double[]>> future : childFutures) {
+                newPopulation.add(future.get()); // Espera cada tarefa finalizar
+            }
+            //newPopulation.addAll(children);
+
+            population = newPopulation;
+            System.out.println("Geração " + gen + " completada");
+        }
+
+        executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.MINUTES); // Garante o fim da execução
+
+        // Por fim, seleciona o elemento com a melhor fitness (menor distância).
+        return population.stream()
+                .min(Comparator.comparingDouble(GeneticAlgorithmPathFindingV2::totalDistance))
+                .orElse(null);
+    }
+
+    /*
+    * Salva melhor rota em um arquivo
+    * */
+    public static void saveRouteToFile(List<double[]> route, String fileName) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (double[] point : route) {
+                writer.write(String.format("[%.6f, %.6f]", point[0], point[1]));
+                writer.newLine();
+            }
+            System.out.println("Rota salva em " + fileName);
+        } catch (IOException e) {
+            System.err.println("Erro ao salvar a rota: " + e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        String arquivoXML = "pedidos_entrega_mini.csv";
+        String cidadeAlvo = "São Paulo";
+
+        try {
+            // Carregar e filtrar dados
+            long startProcessOrders = System.nanoTime();
+            List<double[]> locations = ProcessOrders.getCoordinatesFromCSV(arquivoXML, cidadeAlvo);
+            long endProcessOrders = System.nanoTime();
+            System.out.println("Dados carregados: " + locations.size() + " locais");
+            System.out.println("Tempo de carregamento dos dados: " + (endProcessOrders-startProcessOrders)/1_000_000 + " ms");
+            double[] start = {0.0, 0.0};
+
+            // Faz o processamento do algoritmo genético
+            System.out.println("Iniciando algoritmo genético...");
+            long startAlgorithm = System.nanoTime();
+            List<double[]> bestRoute = geneticAlgorithm(locations, start, 10, 10);
+            long endAlgorithm = System.nanoTime();
+            System.out.println("Processamento finalizado");
+            System.out.println("Tempo de processamento: " + (endAlgorithm-startAlgorithm)/1_000_000 + " ms");
+
+            // Salva melhor rota em arquivo
+            System.out.println("Distância total da melhor rota: " + totalDistance(bestRoute));
+            saveRouteToFile(bestRoute, "melhor_rota.txt");
+        } catch (Exception e) {
+            System.err.println("Erro durante carregamento dos dados: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+    }
+}
