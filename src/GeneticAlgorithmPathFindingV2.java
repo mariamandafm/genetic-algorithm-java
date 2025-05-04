@@ -198,13 +198,13 @@ class GeneticAlgorithmPathFindingV2 {
     }
 
     public static void main(String[] args) {
-        String arquivoXML = "pedidos_entrega_mini.csv";
+        String arquivoXML = "pedidos_entrega.csv";
         String cidadeAlvo = "São Paulo";
 
         try {
             // Carregar e filtrar dados
             long startProcessOrders = System.nanoTime();
-            List<double[]> locations = ProcessOrders.getCoordinatesFromCSV(arquivoXML, cidadeAlvo);
+            List<double[]> locations = ProcessOrdersV2.getCoordinatesFromCSV(arquivoXML, cidadeAlvo);
             long endProcessOrders = System.nanoTime();
             System.out.println("Dados carregados: " + locations.size() + " locais");
             System.out.println("Tempo de carregamento dos dados: " + (endProcessOrders-startProcessOrders)/1_000_000 + " ms");
