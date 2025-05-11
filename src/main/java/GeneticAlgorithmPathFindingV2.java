@@ -1,9 +1,12 @@
+package main.java;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.*;
 
-class GeneticAlgorithmPathFindingV1 {
+public class GeneticAlgorithmPathFindingV2 {
     static Random random = new Random();
 
     /*
@@ -50,8 +53,9 @@ class GeneticAlgorithmPathFindingV1 {
             selected.add(population.get(random.nextInt(population.size())));
         }
         return selected.stream()
-                .min(Comparator.comparingDouble(GeneticAlgorithmPathFindingV1::totalDistance))
+                .min(Comparator.comparingDouble(GeneticAlgorithmPathFindingV2::totalDistance))
                 .orElse(null);
+
     }
 
     /*
@@ -98,6 +102,7 @@ class GeneticAlgorithmPathFindingV1 {
     * mutationRate representa a probabilidade de ocorrer uma mutação.
     * */
     static List<double[]> mutate(List<double[]> route, double mutationRate) {
+        //System.out.println(Thread.currentThread().getName());
         // Seleciona um número aleatório que deve estar abaixo da taxa de mutação
         if (random.nextDouble() < mutationRate) {
             // Troca dois genes
@@ -119,40 +124,63 @@ class GeneticAlgorithmPathFindingV1 {
         return route;
     }
 
-    static List<double[]> geneticAlgorithm(List<double[]> locations, double[] start,
-                                           int generations, int populationSize) {
+    public static List<double[]> geneticAlgorithm(List<double[]> locations, double[] start,
+                                           int generations, int populationSize) throws ExecutionException, InterruptedException {
         System.out.println("Criando população");
         List<List<double[]>> population = createPopulation(locations, start, populationSize);
         System.out.println("População criada");
 
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
         // Para cada geração
         for (int gen = 0; gen < generations; gen++) {
+
+
             System.out.println("Gen " + gen);
             // Inicia uma nova população
             List<List<double[]>> newPopulation = new ArrayList<>();
 
             // Seleciona alguns individuos por torneio
+            List<Future<List<double[]>>> tournamentFutures = new ArrayList<>();
             for (int i = 0; i < populationSize / 2; i++) {
-                newPopulation.add(tournamentSelection(population, 2));
+                List<List<double[]>> finalPopulation1 = population;
+                tournamentFutures.add(executor.submit(()->tournamentSelection(finalPopulation1, 2)));
+                //newPopulation.add(tournamentSelection(population, 2));
+            }
+
+            for (Future<List<double[]>> future : tournamentFutures) {
+                newPopulation.add(future.get()); // Espera cada tarefa finalizar
             }
 
             // Faz cruzamento entre elementos e mutação.
+            List<Future<List<double[]>>> childFutures = new ArrayList<>();
             List<List<double[]>> children = new ArrayList<>();
             for (int i = 0; i < populationSize - newPopulation.size(); i++) {
-                List<double[]> parent1 = tournamentSelection(population, 2);
-                List<double[]> parent2 = tournamentSelection(population, 2);
-                List<double[]> child = crossover(parent1, parent2);
-                children.add(mutate(child, 0.2));
+                List<List<double[]>> finalPopulation = population;
+                Future<List<double[]>> future = executor.submit(() -> {
+                    List<double[]> parent1 = tournamentSelection(finalPopulation, 2);
+                    List<double[]> parent2 = tournamentSelection(finalPopulation, 2);
+                    List<double[]> child = crossover(parent1, parent2);
+                    return mutate(child, 0.2);
+                });
+                childFutures.add(future);
             }
-            newPopulation.addAll(children);
+
+            for (Future<List<double[]>> future : childFutures) {
+                newPopulation.add(future.get()); // Espera cada tarefa finalizar
+            }
+            //newPopulation.addAll(children);
 
             population = newPopulation;
             System.out.println("Geração " + gen + " completada");
         }
 
+        executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.MINUTES); // Garante o fim da execução
+
         // Por fim, seleciona o elemento com a melhor fitness (menor distância).
         return population.stream()
-                .min(Comparator.comparingDouble(GeneticAlgorithmPathFindingV1::totalDistance))
+                .min(Comparator.comparingDouble(GeneticAlgorithmPathFindingV2::totalDistance))
                 .orElse(null);
     }
 
@@ -178,7 +206,7 @@ class GeneticAlgorithmPathFindingV1 {
         try {
             // Carregar e filtrar dados
             long startProcessOrders = System.nanoTime();
-            List<double[]> locations = ProcessOrders.getCoordinatesFromCSV(arquivoXML, cidadeAlvo);
+            List<double[]> locations = ProcessOrdersV2.getCoordinatesFromCSV(arquivoXML, cidadeAlvo);
             long endProcessOrders = System.nanoTime();
             System.out.println("Dados carregados: " + locations.size() + " locais");
             System.out.println("Tempo de carregamento dos dados: " + (endProcessOrders-startProcessOrders)/1_000_000 + " ms");
