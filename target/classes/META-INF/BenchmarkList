@@ -1,2 +1,1 @@
-JMH S 29 main.java.benchmark.Banchmark S 74 main.java.benchmark.jmh_generated.Banchmark_benchmarkProcessOrders_jmhTest S 22 benchmarkProcessOrders S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E E U 7 SECONDS E E 
 JMH S 42 main.java.benchmark.BenchmarkProcessOrders S 92 main.java.benchmark.jmh_generated.BenchmarkProcessOrders_benchmarkGeneticAlgorithmV2_jmhTest S 27 benchmarkGeneticAlgorithmV2 S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E E U 7 SECONDS E E 

@@ -4,27 +4,34 @@ import java.io.*;
 import java.util.Random;
 
 public class OrderDataGenerator {
-    private static final long FILE_SIZE = 1L * 1024 * 1024 * 1024; // 1GB
-    private static final String FILE_NAME = "pedidos_entrega.csv";
+    //private static final long FILE_SIZE = 1L * 1024 * 1024 * 1024; // 1GB
+    private static final long FILE_SIZE = 500L * 1024 * 1024; // 500MB
+    private static final String FILE_NAME = "coordenadas_500.txt";
 
-    private static final String[] NOMES = {"João Silva", "Maria Souza", "Carlos Oliveira", "Ana Santos", "Pedro Costa"};
-    private static final String[] CIDADES = {"São Paulo", "Rio de Janeiro", "Belo Horizonte", "Porto Alegre", "Curitiba", "Brasília", "Fortaleza", "Manaus", "Salvador", "Natal", "Palmas", "São Luís","Campo Grande", "Apodi", "João Pessoa", "Parnamirim"};
-    private static final String[] BAIRROS = {"Centro", "Jardins", "Vila Nova", "Liberdade", "Copacabana"};
-    private static final String[] RUAS = {"Rua das Flores", "Avenida Brasil", "Rua XV de Novembro", "Avenida Paulista", "Rua da Praia"};
+    private static final String[] CIDADES = {
+            "São Paulo", "Rio de Janeiro", "Belo Horizonte", "Porto Alegre", "Curitiba",
+            "Brasília", "Fortaleza", "Manaus", "Salvador", "Natal", "Palmas",
+            "São Luís", "Campo Grande", "Apodi", "João Pessoa", "Parnamirim"
+    };
 
     public static void main(String[] args) {
         Random random = new Random();
 
-        String header = "NomeCliente,Telefone,Cidade,CEP,Bairro,Rua,Numero,Latitude,Longitude\n";
-
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
-            writer.write(header);
-            long currentSize = header.getBytes().length;
+            long currentSize = 0;
+            int count = 0;
 
             while (currentSize < FILE_SIZE) {
-                String record = generateOrderRecord(random);
+                String record = generateCoordinates(random);
+
                 writer.write(record);
                 currentSize += record.getBytes().length;
+                count++;
+
+                if (count % 200_000 == 0) {
+                    writer.write("-\n");
+                    currentSize += 2; // for "-\n"
+                }
             }
 
             System.out.println("Arquivo gerado: " + FILE_NAME);
@@ -34,35 +41,14 @@ public class OrderDataGenerator {
         }
     }
 
-    private static String generateOrderRecord(Random random) {
-        String nome = NOMES[random.nextInt(NOMES.length)];
-        String telefone = generatePhoneNumber(random);
+    private static String generateCoordinates(Random random) {
         String cidade = CIDADES[random.nextInt(CIDADES.length)];
-        String cep = generateCEP(random);
-        String bairro = BAIRROS[random.nextInt(BAIRROS.length)];
-        String rua = RUAS[random.nextInt(RUAS.length)];
-        int numero = random.nextInt(1000) + 1;
-
         double[] coords = getCityCoordinates(cidade);
+
         double latitude = coords[0] + (random.nextDouble() - 0.5) * 0.1;
         double longitude = coords[1] + (random.nextDouble() - 0.5) * 0.1;
 
-        return String.format("%s,%s,%s,%s,%s,%s,%d,%.6f,%.6f\n",
-                nome, telefone, cidade, cep, bairro, rua, numero, latitude, longitude);
-    }
-
-    private static String generatePhoneNumber(Random random) {
-        return String.format("(%d) 9%d%d%d%d-%d%d%d%d",
-                11 + random.nextInt(89), // DDD
-                random.nextInt(10), random.nextInt(10), random.nextInt(10), random.nextInt(10),
-                random.nextInt(10), random.nextInt(10), random.nextInt(10), random.nextInt(10));
-    }
-
-    private static String generateCEP(Random random) {
-        return String.format("%d%d%d%d%d-%d%d%d",
-                random.nextInt(10), random.nextInt(10), random.nextInt(10),
-                random.nextInt(10), random.nextInt(10), random.nextInt(10),
-                random.nextInt(10), random.nextInt(10));
+        return String.format("%.6f;%.6f\n", latitude, longitude);
     }
 
     private static double[] getCityCoordinates(String cidade) {
@@ -72,6 +58,17 @@ public class OrderDataGenerator {
             case "Belo Horizonte": return new double[]{-19.9167, -43.9345};
             case "Porto Alegre": return new double[]{-30.0331, -51.2300};
             case "Curitiba": return new double[]{-25.4244, -49.2654};
+            case "Brasília": return new double[]{-15.7939, -47.8828};
+            case "Fortaleza": return new double[]{-3.7172, -38.5433};
+            case "Manaus": return new double[]{-3.1190, -60.0217};
+            case "Salvador": return new double[]{-12.9711, -38.5108};
+            case "Natal": return new double[]{-5.7945, -35.2110};
+            case "Palmas": return new double[]{-10.2491, -48.3243};
+            case "São Luís": return new double[]{-2.5307, -44.3068};
+            case "Campo Grande": return new double[]{-20.4697, -54.6201};
+            case "Apodi": return new double[]{-5.6535, -37.7946};
+            case "João Pessoa": return new double[]{-7.1153, -34.8610};
+            case "Parnamirim": return new double[]{-5.9156, -35.2622};
             default: return new double[]{0, 0};
         }
     }

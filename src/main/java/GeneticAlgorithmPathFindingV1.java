@@ -30,14 +30,12 @@ public class GeneticAlgorithmPathFindingV1 {
     /*
     * Cria população inicial gerando arrays cujos elementos são "genes" ordenados de forma aleatória.
     * */
-    static List<List<double[]>> createPopulation(List<double[]> locations, double[] start, int size) {
+    static List<List<double[]>> createPopulation(List<double[]> locations, int size) {
         List<List<double[]>> population = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            System.out.println("Pop" + i);
+//            System.out.println("Pop" + i);
             List<double[]> route = new ArrayList<>(locations);
             Collections.shuffle(route);
-            route.add(0, start);
-            route.add(start);
             population.add(route);
         }
         return population;
@@ -121,11 +119,11 @@ public class GeneticAlgorithmPathFindingV1 {
         return route;
     }
 
-    public static List<double[]> geneticAlgorithm(List<double[]> locations, double[] start,
+    public static List<double[]> geneticAlgorithm(List<double[]> locations,
                                            int generations, int populationSize) {
-        System.out.println("Criando população");
-        List<List<double[]>> population = createPopulation(locations, start, populationSize);
-        System.out.println("População criada");
+ //       System.out.println("Criando população");
+        List<List<double[]>> population = createPopulation(locations, populationSize);
+//        System.out.println("População criada");
 
         // Para cada geração
         for (int gen = 0; gen < generations; gen++) {
@@ -161,42 +159,42 @@ public class GeneticAlgorithmPathFindingV1 {
     /*
     * Salva melhor rota em um arquivo
     * */
-    public static void saveRouteToFile(List<double[]> route, String fileName) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-            for (double[] point : route) {
-                writer.write(String.format("[%.6f, %.6f]", point[0], point[1]));
-                writer.newLine();
-            }
-            System.out.println("Rota salva em " + fileName);
+    public static void saveRouteToFile(double distance, int groupNumber) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("distancias.txt", true))) {
+//            for (double[] point : route) {
+//                writer.write(String.format("[%.6f, %.6f]", point[0], point[1]));
+//                writer.newLine();
+//            }
+            writer.write("Grupo " + groupNumber + ": " + distance);
+            writer.newLine();
         } catch (IOException e) {
-            System.err.println("Erro ao salvar a rota: " + e.getMessage());
+            System.err.println("Erro ao salvar distancias: " + e.getMessage());
         }
     }
 
     public static void main(String[] args) {
-        String arquivoXML = "pedidos_entrega.csv";
-        String cidadeAlvo = "São Paulo";
+        String arquivoXML = "coordenadas.csv";
 
         try {
             // Carregar e filtrar dados
             long startProcessOrders = System.nanoTime();
-            List<double[]> locations = ProcessOrders.getCoordinatesFromCSV(arquivoXML, cidadeAlvo);
+            //List<List<double[]>> locations = ProcessOrders.getCoordinatesFromCSV(arquivoXML);
             long endProcessOrders = System.nanoTime();
-            System.out.println("Dados carregados: " + locations.size() + " locais");
+            //System.out.println("Dados carregados: " + locations.size() + " locais");
             System.out.println("Tempo de carregamento dos dados: " + (endProcessOrders-startProcessOrders)/1_000_000 + " ms");
             double[] start = {0.0, 0.0};
 
             // Faz o processamento do algoritmo genético
             System.out.println("Iniciando algoritmo genético...");
             long startAlgorithm = System.nanoTime();
-            List<double[]> bestRoute = geneticAlgorithm(locations, start, 10, 10);
+            //List<double[]> bestRoute = geneticAlgorithm(locations, start, 1, 1);
             long endAlgorithm = System.nanoTime();
             System.out.println("Processamento finalizado");
             System.out.println("Tempo de processamento: " + (endAlgorithm-startAlgorithm)/1_000_000 + " ms");
 
             // Salva melhor rota em arquivo
-            System.out.println("Distância total da melhor rota: " + totalDistance(bestRoute));
-            saveRouteToFile(bestRoute, "melhor_rota.txt");
+            //System.out.println("Distância total da melhor rota: " + totalDistance(bestRoute));
+            //saveRouteToFile(bestRoute, "melhor_rota.txt");
         } catch (Exception e) {
             System.err.println("Erro durante carregamento dos dados: " + e.getMessage());
             e.printStackTrace();

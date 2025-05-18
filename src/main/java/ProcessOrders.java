@@ -5,43 +5,66 @@ import java.util.*;
 
 public class ProcessOrders {
 
-    public static List<double[]> getCoordinatesFromCSV(String filePath, String cityFilter) {
-        List<double[]> coordinatesList = new ArrayList<>();
+    public static void getCoordinatesFromCSV(String filePath) {
+        List<List<double[]>> groupedCoordinates = new ArrayList<>();
+        List<double[]> currentGroup = new ArrayList<>();
+        int groupCount = 0;
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
 
             while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
+                line = line.trim();
 
-                if (parts.length < 10) continue; // há dados suficientes
+                if (line.equals("-")) {
+                    if (!currentGroup.isEmpty()) {
+                        groupCount++;
 
-                String city = parts[2].trim(); // cidade
-
-                if (city.equalsIgnoreCase(cityFilter)) {
-                    try {
-                        double latitude = Double.parseDouble(parts[7] + "." + parts[8]);
-                        double longitude = Double.parseDouble(parts[9] + "." + parts[10]);
-                        coordinatesList.add(new double[]{latitude, longitude});
-                    } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter coordenadas: " + Arrays.toString(parts));
+                        List<double[]> bestRoute = GeneticAlgorithmPathFindingV1.geneticAlgorithm(currentGroup, 5, 4);
+                        double distance = GeneticAlgorithmPathFindingV1.totalDistance(bestRoute);
+                        GeneticAlgorithmPathFindingV1.saveRouteToFile(distance, groupCount);
+                        currentGroup.clear();
                     }
+                    continue;
+                }
+
+                String[] parts = line.split(";");
+                if (parts.length != 2) continue;
+
+                try {
+                    double latitude = Double.parseDouble(parts[0].replace(",", "."));
+                    double longitude = Double.parseDouble(parts[1].replace(",", "."));
+
+                    currentGroup.add(new double[]{latitude, longitude});
+                } catch (NumberFormatException e) {
+                    System.err.println("Erro ao converter coordenadas: " + Arrays.toString(parts) + e);
                 }
             }
+
+            // Adiciona o último grupo se não estiver vazio
+            if (!currentGroup.isEmpty()) {
+                List<double[]> bestRoute = GeneticAlgorithmPathFindingV1.geneticAlgorithm(currentGroup, 5, 4);
+                double distance = GeneticAlgorithmPathFindingV1.totalDistance(bestRoute);
+                GeneticAlgorithmPathFindingV1.saveRouteToFile(distance, groupCount);
+                //System.out.println(bestRoute);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return coordinatesList;
     }
 
     public static void main(String[] args) {
-        String filePath = "pedidos_entrega.csv";
-        String city = "Natal";
-        long startProcessOrders = System.nanoTime();
-        List<double[]> coordinates = getCoordinatesFromCSV(filePath, city);
-        long endProcessOrders = System.nanoTime();
-        System.out.println("Tempo de carregamento dos dados: " + (endProcessOrders-startProcessOrders)/1_000_000 + " ms");
-        System.out.println("Coordenadas encontradas para" + city + ": " + coordinates.size());
+        String filePath = "C:\\Users\\amand\\code\\GeneticAlgorithm\\coordenadas_500.txt";
+        long start = System.nanoTime();
+        getCoordinatesFromCSV(filePath);
+        long end = System.nanoTime();
+
+        System.out.println("Tempo de carregamento dos dados: " + (end - start) / 1_000_000 + " ms");
+//        System.out.println("Total de grupos de coordenadas: " + groupedCoordinates.size());
+//        for (int i = 0; i < groupedCoordinates.size(); i++) {
+//            System.out.println("Grupo " + (i + 1) + ": " + groupedCoordinates.get(i).size() + " coordenadas");
+//        }
     }
 }

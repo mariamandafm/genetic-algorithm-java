@@ -20,10 +20,10 @@ public class Banchmark {
         cityFilter = "Natal";
     }
 
-    @Benchmark
-    public List<double[]> benchmarkProcessOrders() throws IOException {
-        return ProcessOrders.getCoordinatesFromCSV(filePath, cityFilter);
-    }
+//    @Benchmark
+//    public List<double[]> benchmarkProcessOrders() throws IOException {
+//        return ProcessOrders.getCoordinatesFromCSV(filePath, cityFilter);
+//    }
 
 
 }
