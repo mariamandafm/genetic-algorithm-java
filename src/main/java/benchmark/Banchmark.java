@@ -1,16 +1,14 @@
 package main.java.benchmark;
-import main.java.ProcessOrders;
+import main.java.ProcessCoordinates;
 import org.openjdk.jmh.annotations.*;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Thread)
 public class Banchmark {
-    private ProcessOrders po;
+    private ProcessCoordinates po;
     private String filePath;
     private String cityFilter;
 

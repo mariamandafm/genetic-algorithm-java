@@ -22,7 +22,7 @@ A classe `OrderDataGenerator` cria esses dados mocados para serem utilizados na 
 
 ℹ️ O algoritmo está sendo rodado com os parametros population: 10, generations: 10.
 
-| Versão | Java                   | Rust                                              | Descrição                 |
-|--------|------------------------|---------------------------------------------------|---------------------------|
-| v1     | 1115.524 s             | Leitura dos dados 12.80s + Processamento 1373.87s | Implementação sequêncial. |
-| v2     | Processamento 126.583s |                                                   | Platform threads          |
+| Versão | Java                   | Rust     | Descrição                 |
+|--------|------------------------|----------|---------------------------|
+| v1     | 1115.524 s             | 680.84s  | Implementação sequêncial. |
+| v2     | Processamento 126.583s |          | Platform threads          |

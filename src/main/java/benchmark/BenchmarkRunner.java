@@ -9,6 +9,7 @@ public class BenchmarkRunner {
         Options opt = new OptionsBuilder()
                 .include(BenchmarkProcessOrders.class.getSimpleName())
                 .warmupIterations(2)
+                .measurementIterations(10)
                 .forks(1)
                 .build();
         new Runner(opt).run();

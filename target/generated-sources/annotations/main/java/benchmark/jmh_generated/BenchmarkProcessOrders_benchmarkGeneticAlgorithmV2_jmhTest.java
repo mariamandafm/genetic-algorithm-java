@@ -75,7 +75,7 @@ public final class BenchmarkProcessOrders_benchmarkGeneticAlgorithmV2_jmhTest {
 
             control.announceWarmupReady();
             while (control.warmupShouldWait) {
-                blackhole.consume(l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2());
+                l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2();
                 if (control.shouldYield) Thread.yield();
                 res.allOps++;
             }
@@ -86,7 +86,7 @@ public final class BenchmarkProcessOrders_benchmarkGeneticAlgorithmV2_jmhTest {
             control.announceWarmdownReady();
             try {
                 while (control.warmdownShouldWait) {
-                    blackhole.consume(l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2());
+                    l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2();
                     if (control.shouldYield) Thread.yield();
                     res.allOps++;
                 }
@@ -118,7 +118,7 @@ public final class BenchmarkProcessOrders_benchmarkGeneticAlgorithmV2_jmhTest {
         long realTime = 0;
         result.startTime = System.nanoTime();
         do {
-            blackhole.consume(l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2());
+            l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2();
             operations++;
         } while(!control.isDone);
         result.stopTime = System.nanoTime();
@@ -144,7 +144,7 @@ public final class BenchmarkProcessOrders_benchmarkGeneticAlgorithmV2_jmhTest {
 
             control.announceWarmupReady();
             while (control.warmupShouldWait) {
-                blackhole.consume(l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2());
+                l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2();
                 if (control.shouldYield) Thread.yield();
                 res.allOps++;
             }
@@ -155,7 +155,7 @@ public final class BenchmarkProcessOrders_benchmarkGeneticAlgorithmV2_jmhTest {
             control.announceWarmdownReady();
             try {
                 while (control.warmdownShouldWait) {
-                    blackhole.consume(l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2());
+                    l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2();
                     if (control.shouldYield) Thread.yield();
                     res.allOps++;
                 }
@@ -187,7 +187,7 @@ public final class BenchmarkProcessOrders_benchmarkGeneticAlgorithmV2_jmhTest {
         long realTime = 0;
         result.startTime = System.nanoTime();
         do {
-            blackhole.consume(l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2());
+            l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2();
             operations++;
         } while(!control.isDone);
         result.stopTime = System.nanoTime();
@@ -213,7 +213,7 @@ public final class BenchmarkProcessOrders_benchmarkGeneticAlgorithmV2_jmhTest {
 
             control.announceWarmupReady();
             while (control.warmupShouldWait) {
-                blackhole.consume(l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2());
+                l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2();
                 if (control.shouldYield) Thread.yield();
                 res.allOps++;
             }
@@ -228,7 +228,7 @@ public final class BenchmarkProcessOrders_benchmarkGeneticAlgorithmV2_jmhTest {
             control.announceWarmdownReady();
             try {
                 while (control.warmdownShouldWait) {
-                    blackhole.consume(l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2());
+                    l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2();
                     if (control.shouldYield) Thread.yield();
                     res.allOps++;
                 }
@@ -267,7 +267,7 @@ public final class BenchmarkProcessOrders_benchmarkGeneticAlgorithmV2_jmhTest {
             }
             for (int b = 0; b < batchSize; b++) {
                 if (control.volatileSpoiler) return;
-                blackhole.consume(l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2());
+                l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2();
             }
             if (sample) {
                 buffer.add((System.nanoTime() - time) / opsPerInv);
@@ -323,7 +323,7 @@ public final class BenchmarkProcessOrders_benchmarkGeneticAlgorithmV2_jmhTest {
         result.startTime = System.nanoTime();
         for (int b = 0; b < batchSize; b++) {
             if (control.volatileSpoiler) return;
-            blackhole.consume(l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2());
+            l_benchmarkprocessorders0_0.benchmarkGeneticAlgorithmV2();
         }
         result.stopTime = System.nanoTime();
         result.realTime = realTime;
