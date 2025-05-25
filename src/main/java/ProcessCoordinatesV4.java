@@ -10,15 +10,15 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*
- * v3 usa apenas virtual threads.
+ * v4 usa platform threads para calcular as rotas e virtual threads para ler o arquivo.
  * */
-public class ProcessCoordinatesV3 {
+public class ProcessCoordinatesV4 {
     public static void calculateBestRoutes(String filePath) throws InterruptedException {
         List<double[]> currentGroup = new ArrayList<>();
         BlockingQueue<List<double[]>> fila = new LinkedBlockingQueue<>();
         AtomicInteger groupCount = new AtomicInteger();
         int availableProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+        ExecutorService executor = Executors.newFixedThreadPool(availableProcessors);
 
         Thread reader = getReader(filePath, currentGroup, fila, availableProcessors);
 
