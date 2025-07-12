@@ -1,5 +1,6 @@
 package main.java;
 
+import main.java.algorithm.GeneticAlgorithmPathFindingV2;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;

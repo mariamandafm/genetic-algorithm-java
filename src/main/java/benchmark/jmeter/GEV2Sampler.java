@@ -25,7 +25,6 @@ public class GEV2Sampler extends AbstractJavaSamplerClient {
             result.setResponseMessage("Erro: " + e);
             result.setResponseCode("500");
         }
-
         return result;
     }
 }

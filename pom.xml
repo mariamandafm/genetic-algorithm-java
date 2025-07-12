@@ -56,6 +56,12 @@
             <artifactId>ApacheJMeter_core</artifactId>
             <version>5.6.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjdk.jcstress</groupId>
+            <artifactId>jcstress-core</artifactId>
+            <version>0.16</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

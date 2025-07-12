@@ -1,6 +1,6 @@
 package main.java.benchmark.jmeter;
 
-import main.java.ProcessCoordinates;
+import main.java.ProcessCoordinatesSequential;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
@@ -13,7 +13,7 @@ public class GESampler extends AbstractJavaSamplerClient {
         result.sampleStart();
 
         try{
-            ProcessCoordinates.main(new String[0]);
+            ProcessCoordinatesSequential.main(new String[0]);
 
             result.sampleEnd();
             result.setSuccessful(true);

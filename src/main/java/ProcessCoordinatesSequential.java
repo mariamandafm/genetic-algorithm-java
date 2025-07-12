@@ -1,14 +1,15 @@
 package main.java;
 
+import main.java.algorithm.GeneticAlgorithmPathFindingV2;
+
 import java.io.*;
 import java.util.*;
  /*
  * v1 implementação serial
  * */
-public class ProcessCoordinates {
+public class ProcessCoordinatesSequential {
 
     public static void calculateBestRoutes(String filePath) {
-        List<List<double[]>> groupedCoordinates = new ArrayList<>();
         List<double[]> currentGroup = new ArrayList<>();
         int groupCount = 0;
 
@@ -24,7 +25,7 @@ public class ProcessCoordinates {
                         System.out.println(groupCount);
                         List<double[]> bestRoute = GeneticAlgorithmPathFindingV2.geneticAlgorithm(currentGroup, 10, 10);
                         double distance = GeneticAlgorithmPathFindingV2.totalDistance(bestRoute);
-                        GeneticAlgorithmPathFindingV2.saveRouteToFile(distance, groupCount);
+                        saveRouteToFile(distance, groupCount);
                         currentGroup.clear();
                     }
                     continue;
@@ -48,7 +49,7 @@ public class ProcessCoordinates {
                 groupCount++;
                 List<double[]> bestRoute = GeneticAlgorithmPathFindingV2.geneticAlgorithm(currentGroup, 10, 10);
                 double distance = GeneticAlgorithmPathFindingV2.totalDistance(bestRoute);
-                GeneticAlgorithmPathFindingV2.saveRouteToFile(distance, groupCount);
+                saveRouteToFile(distance, groupCount);
                 //System.out.println(bestRoute);
             }
 
@@ -57,6 +58,15 @@ public class ProcessCoordinates {
         }
 
     }
+
+     private static void saveRouteToFile(double distance, int groupNumber) {
+         try (BufferedWriter writer = new BufferedWriter(new FileWriter("distancias.txt", true))) {
+             writer.write("Grupo " + groupNumber + ": " + distance);
+             writer.newLine();
+         } catch (IOException e) {
+             System.err.println("Erro ao salvar distancias: " + e.getMessage());
+         }
+     }
 
     public static void main(String[] args) {
         String filePath = "C:\\Users\\amand\\code\\GeneticAlgorithm\\coordenadas_1000_50.txt";

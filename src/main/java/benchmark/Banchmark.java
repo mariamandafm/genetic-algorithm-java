@@ -1,5 +1,5 @@
 package main.java.benchmark;
-import main.java.ProcessCoordinates;
+import main.java.ProcessCoordinatesSequential;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.concurrent.TimeUnit;
@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Thread)
 public class Banchmark {
-    private ProcessCoordinates po;
+    private ProcessCoordinatesSequential po;
     private String filePath;
     private String cityFilter;
 

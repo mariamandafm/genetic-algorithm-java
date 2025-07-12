@@ -1,6 +1,6 @@
 package main.java.benchmark;
-import main.java.GeneticAlgorithmPathFindingV2;
-import main.java.GeneticAlgorithmPathFindingV1;
+import main.java.algorithm.GeneticAlgorithmPathFindingV2;
+import main.java.algorithm.GeneticAlgorithmPathFindingV1;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.ArrayList;
