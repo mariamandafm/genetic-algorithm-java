@@ -8,6 +8,8 @@ inline,main/java/benchmark/BenchmarkProcessOrders.benchmarkCrossoverV2
 inline,main/java/benchmark/BenchmarkProcessOrders.benchmarkGeneticAlgorithmV1
 inline,main/java/benchmark/BenchmarkProcessOrders.benchmarkGeneticAlgorithmV2
 inline,main/java/benchmark/BenchmarkProcessOrders.benchmarkMutate
+inline,main/java/benchmark/BenchmarkProcessOrders.benchmarkReadData
+inline,main/java/benchmark/BenchmarkProcessOrders.benchmarkSaveRouteToFile
 inline,main/java/benchmark/BenchmarkProcessOrders.benchmarkTotalDistance
 inline,main/java/benchmark/BenchmarkProcessOrders.benchmarkTournamentSelection
 inline,main/java/benchmark/BenchmarkProcessOrders.setup

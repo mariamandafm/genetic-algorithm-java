@@ -1,28 +1,25 @@
 package main.java;
 
-import main.java.runnables.BestRouteRecursiveAction;
-import main.java.runnables.BestRouteRecursiveTask;
+import main.java.algorithm.GeneticAlgorithmPathFindingV2;
 
 import java.io.*;
-import java.util.*;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
- * Usa o Fork/Join com Callable
+ * Usa o Completable Future
  * */
-public class ProcessCoordinatesForkJoinV2 {
+public class ProcessCoordinatesCompletableFutureV2 {
     public static void calculateBestRoutes(String filePath) throws InterruptedException {
-        List<List<double[]>> allGroups = new ArrayList<>();
         List<double[]> currentGroup = new ArrayList<>();
-        int groupCount = 0;
 
-        ForkJoinPool forkJoinPool = new ForkJoinPool();
+        List<CompletableFuture<Double>> completableFutures = new ArrayList<>();
+        AtomicInteger groupCount = new AtomicInteger();
 
-        //Map<Integer, ForkJoinTask<Double>> tasks = new HashMap<>();
-
-        // Ler grupos
+        // Ler grupos e criar futures
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -30,7 +27,13 @@ public class ProcessCoordinatesForkJoinV2 {
 
                 if (line.equals("-")) {
                     if (!currentGroup.isEmpty()) {
-                        allGroups.add(new ArrayList<>(currentGroup));
+                        List<double[]> groupCopy = new ArrayList<>(currentGroup);
+                        CompletableFuture<Double> completableFuture = CompletableFuture.supplyAsync(() -> {
+                            List<double[]> bestRoute = GeneticAlgorithmPathFindingV2.geneticAlgorithm(groupCopy, 10, 10);
+                            double distance = GeneticAlgorithmPathFindingV2.totalDistance(bestRoute);
+                            return distance;
+                        });
+                        completableFutures.add(completableFuture);
                         currentGroup.clear();
                     }
                     continue;
@@ -38,25 +41,25 @@ public class ProcessCoordinatesForkJoinV2 {
                 addCoordinatePairToGroup(line, currentGroup);
             }
             if (!currentGroup.isEmpty()) {
-                allGroups.add(new ArrayList<>(currentGroup));
+                List<double[]> groupCopy = new ArrayList<>(currentGroup);
+                CompletableFuture<Double> completableFuture = CompletableFuture.supplyAsync(() -> {
+                    List<double[]> bestRoute = GeneticAlgorithmPathFindingV2.geneticAlgorithm(groupCopy, 10, 10);
+                    double distance = GeneticAlgorithmPathFindingV2.totalDistance(bestRoute);
+                    return distance;
+                });
+                completableFutures.add(completableFuture);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        List<Double> distances = forkJoinPool.invoke(new BestRouteRecursiveTask(allGroups));
-        forkJoinPool.shutdown();
-        try{
-            forkJoinPool.awaitTermination(60, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println(distances.size());
-        for (double distance : distances){
-            saveRouteToFile(distance, groupCount++);
-            System.out.println(groupCount);
-        }
-
+        // coletar futures
+        completableFutures.stream()
+                .map(CompletableFuture::join)
+                .forEach(distance -> {
+                    int groupNumber = groupCount.getAndIncrement();
+                    System.out.println(groupNumber);
+                    saveRouteToFile(distance, groupNumber);
+                });
     }
 
     private static void saveRouteToFile(double distance, int groupNumber) {

@@ -16,24 +16,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  * */
 public class ProcessCoordinatesForkJoinV1 {
     public static void calculateBestRoutes(String filePath) throws InterruptedException {
+        List<List<double[]>> allGroups = new ArrayList<>();
         List<double[]> currentGroup = new ArrayList<>();
         AtomicInteger groupCount = new AtomicInteger();
 
-        int count = 0;
-
         ForkJoinPool forkJoinPool = new ForkJoinPool();
 
+        // Ler grupos
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
-
             while ((line = br.readLine()) != null) {
                 line = line.trim();
 
                 if (line.equals("-")) {
                     if (!currentGroup.isEmpty()) {
-                        System.out.println(count++);
-                        List<double[]> groupCopy = new ArrayList<>(currentGroup); // cópia segura
-                        forkJoinPool.execute(new BestRouteRecursiveAction(groupCopy, groupCount));
+                        allGroups.add(new ArrayList<>(currentGroup));
                         currentGroup.clear();
                     }
                     continue;
@@ -41,21 +38,18 @@ public class ProcessCoordinatesForkJoinV1 {
                 addCoordinatePairToGroup(line, currentGroup);
             }
             if (!currentGroup.isEmpty()) {
-                System.out.println(count++);
-                List<double[]> groupCopy = new ArrayList<>(currentGroup); // cópia segura
-                forkJoinPool.execute(new BestRouteRecursiveAction(groupCopy, groupCount));
-                currentGroup.clear();
-            }
-
-            System.out.println("[x] Encerrando...");
-
-            forkJoinPool.shutdown();
-            try{
-                forkJoinPool.awaitTermination(60, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                allGroups.add(new ArrayList<>(currentGroup));
             }
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        forkJoinPool.invoke(new BestRouteRecursiveAction(allGroups, groupCount));
+        forkJoinPool.shutdown();
+        try{
+            forkJoinPool.awaitTermination(60, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -77,9 +71,6 @@ public class ProcessCoordinatesForkJoinV1 {
 
     public static void main(String[] args) throws InterruptedException {
         String filePath = "C:\\Users\\amand\\code\\GeneticAlgorithm\\coordenadas_1000_50.txt";
-        long start = System.nanoTime();
         calculateBestRoutes(filePath);
-        long end = System.nanoTime();
-        System.out.println("Tempo de carregamento dos dados: " + (end - start) / 1_000_000 + " ms");
     }
 }

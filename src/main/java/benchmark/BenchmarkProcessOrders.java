@@ -1,6 +1,9 @@
 package main.java.benchmark;
+import main.java.ProcessCoordinatesExecutorV2;
+import main.java.ProcessCoordinatesParallelStreamV2;
 import main.java.algorithm.GeneticAlgorithmPathFindingV2;
 import main.java.algorithm.GeneticAlgorithmPathFindingV1;
+import main.java.runnables.BestRouteRecursiveAction;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.ArrayList;
@@ -19,6 +22,9 @@ public class BenchmarkProcessOrders {
     private List<double[]> individual4;
 
     private final List<List<double[]>> population = new ArrayList<>();
+
+    List<List<double[]>> allGroups = new ArrayList<>();
+    List<double[]> currentGroup = new ArrayList<>();
 
     public static List<double[]> generateRandomCoordinates(int size) {
         List<double[]> coordinates = new ArrayList<>(size);
@@ -48,38 +54,48 @@ public class BenchmarkProcessOrders {
 
     @Benchmark
     public void benchmarkCrossoverV1(){
-        GeneticAlgorithmPathFindingV1.crossover(individual1, individual2);
+        //GeneticAlgorithmPathFindingV1 .crossover(individual1, individual2);
     }
 
     @Benchmark
     public void benchmarkCrossoverV2(){
-        GeneticAlgorithmPathFindingV2.crossover(individual1, individual2);
+        //GeneticAlgorithmPathFindingV2.crossover(individual1, individual2);
     }
 
     @Benchmark
     public void benchmarkTotalDistance(){
-        GeneticAlgorithmPathFindingV1.totalDistance(individual1);
+        //GeneticAlgorithmPathFindingV1.totalDistance(individual1);
     }
 
     @Benchmark
     public void benchmarkTournamentSelection(){
-        GeneticAlgorithmPathFindingV1.tournamentSelection(population, 2);
+        //GeneticAlgorithmPathFindingV1.tournamentSelection(population, 2);
     }
     @Benchmark
     public void benchmarkMutate(){
-        GeneticAlgorithmPathFindingV1.mutate(individual1, 0.2);
+        //GeneticAlgorithmPathFindingV1.mutate(individual1, 0.2);
     }
 
     @Benchmark
     public void benchmarkGeneticAlgorithmV1(){
-        GeneticAlgorithmPathFindingV1.geneticAlgorithm(individual1, 10, 10);
+        //GeneticAlgorithmPathFindingV1.geneticAlgorithm(individual1, 10, 10);
     }
 
     @Benchmark
     public void benchmarkGeneticAlgorithmV2(){
-        GeneticAlgorithmPathFindingV2.geneticAlgorithm(individual1, 10, 10);
+        //GeneticAlgorithmPathFindingV2.geneticAlgorithm(individual1, 10, 10);
     }
 
+    @Benchmark
+    public void benchmarkSaveRouteToFile(){
+        BestRouteRecursiveAction.saveRouteToFile(67890.0000, 1);
+    }
+
+    @Benchmark
+    public void benchmarkReadData(){
+        String filePath = "C:\\Users\\amand\\code\\GeneticAlgorithm\\coordenadas_1000_50.txt";
+        ProcessCoordinatesParallelStreamV2.readData(filePath, currentGroup, allGroups);
+    }
 }
 // Benchmark
 // crossover

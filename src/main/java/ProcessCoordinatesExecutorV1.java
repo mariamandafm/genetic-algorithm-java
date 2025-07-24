@@ -15,10 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ProcessCoordinatesExecutorV1 {
     public static void calculateBestRoutes(String filePath) throws InterruptedException {
         List<double[]> currentGroup = new ArrayList<>();
-        BlockingQueue<List<double[]>> fila = new LinkedBlockingQueue<>();
         AtomicInteger groupCount = new AtomicInteger();
 
-        int availableProcessors = 10;
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(availableProcessors);
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -29,7 +28,7 @@ public class ProcessCoordinatesExecutorV1 {
 
                 if (line.equals("-")) {
                     if (!currentGroup.isEmpty()) {
-                        List<double[]> groupCopy = new ArrayList<>(currentGroup); // cópia segura
+                        List<double[]> groupCopy = new ArrayList<>(currentGroup);
                         executor.execute(new BestRouteRunnable(groupCopy, groupCount));
                         currentGroup.clear();
                     }
@@ -71,9 +70,6 @@ public class ProcessCoordinatesExecutorV1 {
 
     public static void main(String[] args) throws InterruptedException {
         String filePath = "C:\\Users\\amand\\code\\GeneticAlgorithm\\coordenadas_1000_50.txt";
-        long start = System.nanoTime();
         calculateBestRoutes(filePath);
-        long end = System.nanoTime();
-        System.out.println("Tempo de carregamento dos dados: " + (end - start) / 1_000_000 + " ms");
     }
 }

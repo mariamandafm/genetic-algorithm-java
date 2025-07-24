@@ -71,7 +71,7 @@ public class ProcessCoordinatesExecutorV2 {
         }
     }
 
-    private static synchronized void saveRouteToFile(double distance, int groupNumber) {
+    private static void saveRouteToFile(double distance, int groupNumber) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("distancias.txt", true))) {
             writer.write("Grupo " + groupNumber + ": " + distance);
             writer.newLine();
@@ -97,9 +97,6 @@ public class ProcessCoordinatesExecutorV2 {
 
     public static void main(String[] args) throws InterruptedException {
         String filePath = "C:\\Users\\amand\\code\\GeneticAlgorithm\\coordenadas_1000_50.txt";
-        long start = System.nanoTime();
         calculateBestRoutes(filePath);
-        long end = System.nanoTime();
-        System.out.println("Tempo de carregamento dos dados: " + (end - start) / 1_000_000 + " ms");
     }
 }

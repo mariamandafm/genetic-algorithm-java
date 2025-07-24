@@ -17,7 +17,24 @@ public class ProcessCoordinatesParallelStreamV2 {
         List<double[]> currentGroup = new ArrayList<>();
         int count = 0;
 
-        // Ler grupos
+        // ler grupos
+        readData(filePath, currentGroup, allGroups);
+
+        // parallel stream
+        List<Double> results = allGroups.parallelStream().map(group -> {
+            List<double[]> bestRoute = GeneticAlgorithmPathFindingV2.geneticAlgorithm(group, 10, 10);
+            double distance = GeneticAlgorithmPathFindingV2.totalDistance(bestRoute);
+            return distance;
+        }).collect(Collectors.toList());
+
+        for (Double distance : results){
+            int groupNumber = count++;
+            System.out.println(groupNumber);
+            saveRouteToFile(distance, groupNumber);
+        }
+    }
+
+    public static void readData(String filePath, List<double[]> currentGroup, List<List<double[]>> allGroups) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -37,19 +54,6 @@ public class ProcessCoordinatesParallelStreamV2 {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        // Parallel Stream
-        List<Double> results = allGroups.parallelStream().map(group -> {
-            List<double[]> bestRoute = GeneticAlgorithmPathFindingV2.geneticAlgorithm(group, 10, 10);
-            double distance = GeneticAlgorithmPathFindingV2.totalDistance(bestRoute);
-            return distance;
-        }).collect(Collectors.toList());
-
-        for (Double distance : results){
-            int groupNumber = count++;
-            System.out.println(groupNumber);
-            saveRouteToFile(distance, groupNumber);
         }
     }
 
@@ -78,9 +82,6 @@ public class ProcessCoordinatesParallelStreamV2 {
 
     public static void main(String[] args) throws InterruptedException {
         String filePath = "C:\\Users\\amand\\code\\GeneticAlgorithm\\coordenadas_1000_50.txt";
-        long start = System.nanoTime();
         calculateBestRoutes(filePath);
-        long end = System.nanoTime();
-        System.out.println("Tempo de carregamento dos dados: " + (end - start) / 1_000_000 + " ms");
     }
 }

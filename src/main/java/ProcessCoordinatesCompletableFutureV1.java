@@ -3,19 +3,23 @@ package main.java;
 import main.java.algorithm.GeneticAlgorithmPathFindingV2;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*
- * Usa o Parallel Stream com syncronized.
+ * Usa o Completable Future
  * */
-public class ProcessCoordinatesParallelStreamV1 {
+public class ProcessCoordinatesCompletableFutureV1 {
     public static void calculateBestRoutes(String filePath) throws InterruptedException {
-        List<List<double[]>> allGroups = new ArrayList<>();
         List<double[]> currentGroup = new ArrayList<>();
         AtomicInteger groupCount = new AtomicInteger();
 
-        // Ler grupos
+        List<CompletableFuture<Void>> completableFutures = new ArrayList<>();
+
+        // ler grupos e criar futures
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -23,7 +27,15 @@ public class ProcessCoordinatesParallelStreamV1 {
 
                 if (line.equals("-")) {
                     if (!currentGroup.isEmpty()) {
-                        allGroups.add(new ArrayList<>(currentGroup));
+                        List<double[]> groupCopy = new ArrayList<>(currentGroup);
+                        CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(() -> {
+                            int groupNumber = groupCount.getAndIncrement();
+                            System.out.println(groupNumber);
+                            List<double[]> bestRoute = GeneticAlgorithmPathFindingV2.geneticAlgorithm(groupCopy, 10, 10);
+                            double distance = GeneticAlgorithmPathFindingV2.totalDistance(bestRoute);
+                            saveRouteToFile(distance, groupNumber);
+                        });
+                        completableFutures.add(completableFuture);
                         currentGroup.clear();
                     }
                     continue;
@@ -31,20 +43,24 @@ public class ProcessCoordinatesParallelStreamV1 {
                 addCoordinatePairToGroup(line, currentGroup);
             }
             if (!currentGroup.isEmpty()) {
-                allGroups.add(new ArrayList<>(currentGroup));
+                List<double[]> groupCopy = new ArrayList<>(currentGroup);
+                CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(() -> {
+                    int groupNumber = groupCount.getAndIncrement();
+                    System.out.println(groupNumber);
+                    List<double[]> bestRoute = GeneticAlgorithmPathFindingV2.geneticAlgorithm(groupCopy, 10, 10);
+                    double distance = GeneticAlgorithmPathFindingV2.totalDistance(bestRoute);
+                    saveRouteToFile(distance, groupNumber);
+                });
+                completableFutures.add(completableFuture);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        // Parallel Stream
-        allGroups.parallelStream().forEach(group -> {
-            int groupNumber = groupCount.getAndIncrement();
-            System.out.println(groupNumber);
-            List<double[]> bestRoute = GeneticAlgorithmPathFindingV2.geneticAlgorithm(group, 10, 10);
-            double distance = GeneticAlgorithmPathFindingV2.totalDistance(bestRoute);
-            saveRouteToFile(distance, groupNumber);
-        });
+        // coletar futures
+        CompletableFuture<Void> allDone = CompletableFuture.allOf(
+                completableFutures.toArray(new CompletableFuture[0])
+        );
+        allDone.join();
     }
 
     private static synchronized void saveRouteToFile(double distance, int groupNumber) {
